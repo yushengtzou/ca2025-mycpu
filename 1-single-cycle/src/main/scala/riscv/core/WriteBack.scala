@@ -45,8 +45,8 @@ class WriteBack extends Module {
   // Hint: Specify default value and cases for each source type
   io.regs_write_data := MuxLookup(io.regs_write_source, ?)(
     Seq(
-      RegWriteSource.Memory                 -> ?,
-      RegWriteSource.NextInstructionAddress -> ?
+      RegWriteSource.Memory                 -> io.memory_read_data,
+      RegWriteSource.NextInstructionAddress -> (io.instruction_address + 4.U)
     )
   )
 }
