@@ -71,39 +71,19 @@ class MemoryAccess extends Module {
       Seq(
         // TODO: Complete LB (sign-extend byte)
         // Hint: Replicate sign bit, then concatenate with byte
-        InstructionsTypeL.lb -> MuxLookup(mem_address_index, Cat(Fill(24, data(31)), data(31, 24)))(
-          Seq(
-            0.U -> Cat(Fill(24, bytes(0)(7)), bytes(0)),
-            1.U -> Cat(Fill(24, bytes(1)(7)), bytes(1)),
-            2.U -> Cat(Fill(24, bytes(2)(7)), bytes(2)),          
-          )
-        ),
+        InstructionsTypeL.lb -> Cat(Fill(24, byte(7)), byte),
 
         // TODO: Complete LBU (zero-extend byte)
         // Hint: Fill upper bits with zero, then concatenate with byte
-        InstructionsTypeL.lbu -> MuxLookup(mem_address_index, Cat(Fill(24, 0.U), data(31, 24)))(
-          Seq(
-            0.U -> Cat(Fill(24, 0.U), bytes(0)),
-            1.U -> Cat(Fill(24, 0.U), bytes(1)),
-            2.U -> Cat(Fill(24, 0.U), bytes(2)
-          )
-        ),
+        InstructionsTypeL.lbu -> Cat(Fill(24, 0.U), byte),
 
         // TODO: Complete LH (sign-extend halfword)
         // Hint: Replicate sign bit, then concatenate with halfword
-        InstructionsTypeL.lh -> Mux(
-          mem_address_index === 0.U,
-          Cat(Fill(16, half(15)), half),
-          Cat(Fill(16, half(15)), half)
-        ),
+        InstructionsTypeL.lh -> Cat(Fill(16, half(15)), half),
 
         // TODO: Complete LHU (zero-extend halfword)
         // Hint: Fill upper bits with zero, then concatenate with halfword
-        InstructionsTypeL.lhu -> Mux(
-          mem_address_index === 0.U,
-          Cat(Fill(16, 0.U), half),
-          Cat(Fill(16, 0.U), half)
-        ),
+        InstructionsTypeL.lhu -> Cat(Fill(16, 0.U), half),
 
         // LW: Load full word, no extension needed (completed example)
         InstructionsTypeL.lw -> data
@@ -145,7 +125,7 @@ class MemoryAccess extends Module {
       // 1. Enable single byte strobe at appropriate position
       // 2. Shift byte data to correct position based on address
       io.memory_bundle.write_strobe(mem_address_index) := true.B
-      io.memory_bundle.write_data := io.reg2_data() << (mem_address_index << 3.U)
+      io.memory_bundle.write_data := io.reg2_data(7, 0) << (mem_address_index << 3.U)
 
     }.elsewhen(io.funct3 === InstructionsTypeS.sh) {
       // TODO: Complete store halfword logic

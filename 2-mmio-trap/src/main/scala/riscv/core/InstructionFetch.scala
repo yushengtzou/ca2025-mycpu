@@ -5,6 +5,7 @@
 package riscv.core
 
 import chisel3._
+import chisel3.util._
 import riscv.Parameters
 
 // Program counter reset value
@@ -30,7 +31,7 @@ class InstructionFetch extends Module {
   val pc = RegInit(ProgramCounter.EntryAddress)
 
   // ============================================================
-  // [CA25: Exercise 13] PC Update Logic - Sequential vs Control Flow with Interrupts
+  // [CA25: Exercise 15] PC Update Logic - Sequential vs Control Flow with Interrupts
   // ============================================================
   // Hint: Implement program counter (PC) update logic for sequential execution,
   // control flow changes, and interrupt handling
@@ -55,6 +56,11 @@ class InstructionFetch extends Module {
   // - Normal ADD: PC = 0x1000 → next PC = 0x1004 (sequential)
   // - JAL offset: PC = 0x1000, target = 0x2000 → next PC = 0x2000 (control flow)
   // - Timer interrupt: PC = 0x1000, handler = 0x8000 → next PC = 0x8000 (interrupt)
+  val next_pc = MuxCase(pc + 4.U, Seq(
+    io.interrupt_assert -> io.interrupt_handler_address,
+    io.jump_flag_id     -> io.jump_address_id
+  ))
+  
   when(io.instruction_valid) {
     io.instruction := io.instruction_read_data
 
@@ -66,7 +72,7 @@ class InstructionFetch extends Module {
     // - Inner multiplexer: Check jump flag
     //   - True: Use jump target address
     //   - False: Sequential execution
-    pc := ?
+    pc             := next_pc
 
   }.otherwise {
     // When instruction is invalid, hold PC and insert NOP (ADDI x0, x0, 0)

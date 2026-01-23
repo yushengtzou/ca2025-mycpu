@@ -20,18 +20,22 @@ object InterruptEntry {
   val Timer0 = 0x4.U(8.W)
 }
 
+// CSR 直接存取介面束綁
+// 用於 CLINT 直接讀寫 CSR 暫存器的介面
 class CSRDirectAccessBundle extends Bundle {
-  val mstatus = Input(UInt(Parameters.DataWidth))
-  val mepc    = Input(UInt(Parameters.DataWidth))
-  val mcause  = Input(UInt(Parameters.DataWidth))
-  val mtvec   = Input(UInt(Parameters.DataWidth))
-  val mie     = Input(UInt(Parameters.DataWidth))
+  // 輸入信號 - 來自 CPU 的 CSR 暫存器值
+  val mstatus = Input(UInt(Parameters.DataWidth)) // 機器狀態暫存器
+  val mepc    = Input(UInt(Parameters.DataWidth)) // 機器例外程式計數器
+  val mcause  = Input(UInt(Parameters.DataWidth)) // 機器例外原因暫存器
+  val mtvec   = Input(UInt(Parameters.DataWidth)) // 機器陷阱向量基址
+  val mie     = Input(UInt(Parameters.DataWidth)) // 機器中斷啟用暫存器
 
-  val mstatus_write_data = Output(UInt(Parameters.DataWidth))
-  val mepc_write_data    = Output(UInt(Parameters.DataWidth))
-  val mcause_write_data  = Output(UInt(Parameters.DataWidth))
+  // 輸出信號 - 寫回 CPU 的 CSR 資料
+  val mstatus_write_data = Output(UInt(Parameters.DataWidth)) // mstatus 寫入資料
+  val mepc_write_data    = Output(UInt(Parameters.DataWidth)) // mepc 寫入資料
+  val mcause_write_data  = Output(UInt(Parameters.DataWidth)) // mcause 寫入資料
 
-  val direct_write_enable = Output(Bool())
+  val direct_write_enable = Output(Bool()) // 直接寫入啟用信號
 }
 
 // Core Local Interrupt Controller: manages interrupt entry/exit and CSR state transitions
@@ -77,7 +81,7 @@ class CLINT extends Module {
   )
   val mpie = io.csr_bundle.mstatus(7)
   val mie  = io.csr_bundle.mstatus(3)
-  // val mpp = io.csr_bundle.mstatus(12, 11)  // Not used in M-mode only implementation
+  val mpp = io.csr_bundle.mstatus(12, 11)  // Not used in M-mode only implementation
 
   // ============================================================
   // [CA25: Exercise 11] Interrupt Entry - mstatus State Transition
